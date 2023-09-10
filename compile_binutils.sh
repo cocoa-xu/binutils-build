@@ -5,7 +5,7 @@ if [ -z "${ARCH}" ]; then
     echo "Error: Please pass the desired arch, i.e., i386, x86_64, aarch64"
     exit 1
 fi
-if [ "$ARCH" == *"-"* ]; then
+if [[ "$ARCH" == *"-"* ]]; then
   FULL_TRIPLET="${ARCH}"
 else
   FULL_TRIPLET="${ARCH}-unknown-linux-gnu"
