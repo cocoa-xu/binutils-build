@@ -49,4 +49,7 @@ case "${UNAME_S}" in
     *)
         $MAKE ;;
 esac
-$MAKE install && echo "[+] binutils installed to ${BINUTILS_INSTALL_DIR}"
+esac
+$MAKE install && \
+    rm -rf "${BINUTILS_INSTALL_DIR}/share" && \
+    echo "[+] binutils installed to ${BINUTILS_INSTALL_DIR}"
