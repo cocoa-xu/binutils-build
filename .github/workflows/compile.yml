@@ -51,4 +51,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            cache/*.tar.gz
+            cache/${{ matrix.host_arch }}*.tar.gz
