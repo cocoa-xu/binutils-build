@@ -37,13 +37,18 @@ tar -xf "${BINUTILS_DIR}/binutils-${BINUTILS_VERSION}.tar.gz"
 mkdir -p "${BINUTILS_INSTALL_DIR}"
 cd "${BINUTILS_SRC}"
 
+if [ "${HOST_ARCH}" = "${UNAME_M}" ]; then
+    export CONFIGURE_HOST="" ;
+else
+    export CONFIGURE_HOST="--host='${HOST_TRIPLET}'" ;
+fi
+
 ./configure \
     --disable-debug \
     --disable-dependency-tracking \
     --prefix="${BINUTILS_INSTALL_DIR}" \
     --target="${FULL_TRIPLET}" \
-    --host="${HOST_TRIPLET}" \
-    --disable-static \
+    ${CONFIGURE_HOST} --disable-static \
     --disable-multilib \
     --disable-nls \
     --disable-werror
