@@ -37,23 +37,18 @@ tar -xf "${BINUTILS_DIR}/binutils-${BINUTILS_VERSION}.tar.gz"
 mkdir -p "${BINUTILS_INSTALL_DIR}"
 cd "${BINUTILS_SRC}"
 
-UNAME_S=$(uname -s)
-case "${UNAME_S}" in
-    Darwin*)
-        export CFLAGS="-arch ${HOST_ARCH}" ;;
-    *)
-        ;;
-esac
 ./configure \
     --disable-debug \
     --disable-dependency-tracking \
     --prefix="${BINUTILS_INSTALL_DIR}" \
     --target="${FULL_TRIPLET}" \
+    --host="${HOST_TRIPLET}" \
     --disable-static \
     --disable-multilib \
     --disable-nls \
     --disable-werror
 
+UNAME_S=$(uname -s)
 case "${UNAME_S}" in
     Darwin*)
         $MAKE -j`sysctl -n hw.ncpu` ;;

@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         target_arch: [i386, x86_64, aarch64]
-        host_arch: [x86_64, arm64]
+        host_arch: [x86_64]
 
     name: ${{ matrix.host_arch }}-apple-darwin / ${{ matrix.target_arch }}-linux-gnu
 
