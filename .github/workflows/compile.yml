@@ -1,0 +1,54 @@
+name: compile
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        target_arch: [i386, x86_64, aarch64]
+        host_arch: [x86_64, arm64]
+
+    name: ${{ matrix.host_arch }}-apple-darwin / ${{ matrix.target_arch }}-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile
+        run: |
+          export BINUTILS_DIR="$(pwd)/cache"
+          mkdir -p "${BINUTILS_DIR}"
+
+          export BINUTILS_TARGET_ARCH="${{ matrix.target_arch }}"
+          export BINUTILS_VER="${GITHUB_REF##*/v}"
+          export BINUTILS_HOST_ARCH="${{ matrix.host_arch }}"
+          export HOST_SYSTEM="apple-darwin"
+
+          ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${GITHUB_REF##*/v}" "${BINUTILS_HOST_ARCH}" "${HOST_SYSTEM}"
+      
+      - name: Create precompiled tarball file
+        run: |
+          export HOST_TRIPLET="${{ matrix.host_arch }}-apple-darwin"
+          export TARGET_TRIPLET="${{ matrix.target_arch }}-unknown-linux-gnu"
+          export BINUTILS_VER="${GITHUB_REF##*/v}"
+          export PKG_NAME="${HOST_TRIPLET}_${TARGET_TRIPLET}_${BINUTILS_VER}"
+
+          cd "$(pwd)/cache"
+          tar czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
+
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            cache/*.tar.gz
