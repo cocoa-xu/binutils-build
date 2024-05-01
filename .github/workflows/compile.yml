@@ -13,14 +13,16 @@ permissions:
   contents: write
 
 jobs:
-  macos:
+  x86_64-apple-darwin:
     runs-on: macos-11
     strategy:
       matrix:
         target_arch: [i386, x86_64, aarch64]
-        host_arch: [x86_64]
+    env:
+      BINUTILS_HOST_ARCH: x86_64
+      BINUTILS_HOST_SYSTEM: apple-darwin
 
-    name: ${{ matrix.host_arch }}-apple-darwin / ${{ matrix.target_arch }}-linux-gnu
+    name: x86_64-apple-darwin / ${{ matrix.target_arch }}-linux-gnu
 
     steps:
       - uses: actions/checkout@v4
@@ -32,23 +34,63 @@ jobs:
 
           export BINUTILS_TARGET_ARCH="${{ matrix.target_arch }}"
           export BINUTILS_VER="${GITHUB_REF##*/v}"
-          export BINUTILS_HOST_ARCH="${{ matrix.host_arch }}"
-          export HOST_SYSTEM="apple-darwin"
 
-          ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${GITHUB_REF##*/v}" "${BINUTILS_HOST_ARCH}" "${HOST_SYSTEM}"
-      
+          ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${BINUTILS_VER}" "${BINUTILS_HOST_ARCH}" "${BINUTILS_HOST_SYSTEM}"
+
       - name: Create precompiled tarball file
         run: |
-          export HOST_TRIPLET="${{ matrix.host_arch }}-apple-darwin"
+          export HOST_TRIPLET="${BINUTILS_HOST_ARCH}-${BINUTILS_HOST_SYSTEM}"
           export TARGET_TRIPLET="${{ matrix.target_arch }}-unknown-linux-gnu"
           export BINUTILS_VER="${GITHUB_REF##*/v}"
           export PKG_NAME="${HOST_TRIPLET}_${TARGET_TRIPLET}_${BINUTILS_VER}"
 
-          cd "$(pwd)/cache"
+          export BINUTILS_DIR="$(pwd)/cache"
+          mkdir -p "${BINUTILS_DIR}"
           tar czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
 
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            cache/${{ matrix.host_arch }}*.tar.gz
+            cache/${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
+
+  aarch64-apple-darwin:
+    runs-on: macos-14
+    strategy:
+      matrix:
+        target_arch: [i386, x86_64, aarch64]
+    env:
+      BINUTILS_HOST_ARCH: arm64
+      BINUTILS_HOST_SYSTEM: apple-darwin
+
+    name: aarch64-apple-darwin / ${{ matrix.target_arch }}-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile
+        run: |
+          export BINUTILS_DIR="$(pwd)/cache"
+          mkdir -p "${BINUTILS_DIR}"
+
+          export BINUTILS_TARGET_ARCH="${{ matrix.target_arch }}"
+          export BINUTILS_VER="${GITHUB_REF##*/v}"
+
+          ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${BINUTILS_VER}" "${BINUTILS_HOST_ARCH}" "${BINUTILS_HOST_SYSTEM}"
+
+      - name: Create precompiled tarball file
+        run: |
+          export HOST_TRIPLET="${BINUTILS_HOST_ARCH}-${BINUTILS_HOST_SYSTEM}"
+          export TARGET_TRIPLET="${{ matrix.target_arch }}-unknown-linux-gnu"
+          export BINUTILS_VER="${GITHUB_REF##*/v}"
+          export PKG_NAME="${HOST_TRIPLET}_${TARGET_TRIPLET}_${BINUTILS_VER}"
+
+          export BINUTILS_DIR="$(pwd)/cache"
+          mkdir -p "${BINUTILS_DIR}"
+          tar czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
+
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            cache/${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
