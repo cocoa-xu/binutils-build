@@ -12,7 +12,7 @@ else
 fi
 echo "[+] build for ${FULL_TRIPLET}"
 
-BINUTILS_VERSION="${2:-2.38}"
+BINUTILS_VERSION="${2:-2.42}"
 echo "[+] using binutils ${BINUTILS_VERSION}"
 
 UNAME_M=$(uname -m)
