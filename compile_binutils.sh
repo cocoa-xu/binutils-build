@@ -20,11 +20,13 @@ HOST_ARCH="${3:-$UNAME_M}"
 HOST_SYSTEM=$4
 HOST_TRIPLET="${HOST_ARCH}-${HOST_SYSTEM}"
 
+ROOT_DIR="$(pwd)"
 MAKE="${MAKE:-make}"
 BINUTILS_DIR_DEFAULT="${HOME}/.cache/binutils"
 BINUTILS_DIR=${BINUTILS_DIR:-$BINUTILS_DIR_DEFAULT}
 BINUTILS_SRC="${BINUTILS_DIR}/binutils-${BINUTILS_VERSION}"
-BINUTILS_INSTALL_DIR="${BINUTILS_DIR}/${HOST_TRIPLET}_${FULL_TRIPLET}_${BINUTILS_VERSION}"
+DIR_NAME="${HOST_TRIPLET}_${FULL_TRIPLET}_${BINUTILS_VERSION}"
+BINUTILS_INSTALL_DIR="${BINUTILS_DIR}/${DIR_NAME}"
 
 mkdir -p "${BINUTILS_DIR}"
 cd "${BINUTILS_DIR}"
@@ -34,6 +36,7 @@ fi
 rm -rf "${BINUTILS_SRC}"
 rm -rf "${BINUTILS_INSTALL_DIR}"
 tar -xf "${BINUTILS_DIR}/binutils-${BINUTILS_VERSION}.tar.gz"
+rm -rf "${BINUTILS_DIR}/binutils-${BINUTILS_VERSION}.tar.gz"
 mkdir -p "${BINUTILS_INSTALL_DIR}"
 cd "${BINUTILS_SRC}"
 
@@ -65,3 +68,7 @@ esac
 $MAKE install && \
     rm -rf "${BINUTILS_INSTALL_DIR}/share" && \
     echo "[+] binutils installed to ${BINUTILS_INSTALL_DIR}"
+
+cd "${ROOT_DIR}"
+tar -czf "${ROOT_DIR}/${DIR_NAME}.tar.gz" -C "${BINUTILS_DIR}" "${DIR_NAME}"
+sha256sum "${DIR_NAME}.tar.gz" | tee "${DIR_NAME}.tar.gz.sha256"

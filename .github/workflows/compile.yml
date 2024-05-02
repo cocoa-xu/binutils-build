@@ -37,22 +37,12 @@ jobs:
 
           ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${BINUTILS_VER}" "${BINUTILS_HOST_ARCH}" "${BINUTILS_HOST_SYSTEM}"
 
-      - name: Create precompiled tarball file
-        run: |
-          export HOST_TRIPLET="${BINUTILS_HOST_ARCH}-${BINUTILS_HOST_SYSTEM}"
-          export TARGET_TRIPLET="${{ matrix.target_arch }}-unknown-linux-gnu"
-          export BINUTILS_VER="${GITHUB_REF##*/v}"
-          export PKG_NAME="${HOST_TRIPLET}_${TARGET_TRIPLET}_${BINUTILS_VER}"
-
-          export BINUTILS_DIR="$(pwd)/cache"
-          mkdir -p "${BINUTILS_DIR}"
-          tar czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
-
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            cache/${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
+            ${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
+            ${{ env.BINUTILS_HOST_ARCH }}*.tar.gz.sha256
 
   aarch64-apple-darwin:
     runs-on: macos-14
@@ -78,19 +68,9 @@ jobs:
 
           ./compile_binutils.sh "${BINUTILS_TARGET_ARCH}" "${BINUTILS_VER}" "${BINUTILS_HOST_ARCH}" "${BINUTILS_HOST_SYSTEM}"
 
-      - name: Create precompiled tarball file
-        run: |
-          export HOST_TRIPLET="${BINUTILS_HOST_ARCH}-${BINUTILS_HOST_SYSTEM}"
-          export TARGET_TRIPLET="${{ matrix.target_arch }}-unknown-linux-gnu"
-          export BINUTILS_VER="${GITHUB_REF##*/v}"
-          export PKG_NAME="${HOST_TRIPLET}_${TARGET_TRIPLET}_${BINUTILS_VER}"
-
-          export BINUTILS_DIR="$(pwd)/cache"
-          mkdir -p "${BINUTILS_DIR}"
-          tar czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
-
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            cache/${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
+            ${{ env.BINUTILS_HOST_ARCH }}*.tar.gz
+            ${{ env.BINUTILS_HOST_ARCH }}*.tar.gz.sha256
