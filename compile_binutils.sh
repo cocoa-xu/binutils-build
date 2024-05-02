@@ -71,4 +71,4 @@ $MAKE install && \
 
 cd "${ROOT_DIR}"
 tar -czf "${ROOT_DIR}/${DIR_NAME}.tar.gz" -C "${BINUTILS_DIR}" "${DIR_NAME}"
-sha256sum "${DIR_NAME}.tar.gz" | tee "${DIR_NAME}.tar.gz.sha256"
+shasum -a 256 "${DIR_NAME}.tar.gz" | tee "${DIR_NAME}.tar.gz.sha256"
